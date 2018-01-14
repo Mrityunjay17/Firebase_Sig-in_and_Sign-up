@@ -74,15 +74,14 @@ public class HomeActivity extends AppCompatActivity
         imgProfile=navHeader.findViewById(R.id.profileImage);
         name.setText(user.getDisplayName());
         emailId.setText(user.getEmail());
-        String url="http://www.fixxgroup.com/wp-content/uploads/2017/08/holi-image-4-big.jpg";
         if(user.getPhotoUrl()!=null){
-           url=user.getPhotoUrl().toString();
+            Glide.with(this).load(user.getPhotoUrl().toString())
+                    .thumbnail(0.5f)
+                    .apply(RequestOptions.bitmapTransform(new C()).diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(imgProfile);
         }
 
-        Glide.with(this).load(url)
-                .thumbnail(0.5f)
-                .apply(RequestOptions.bitmapTransform(new C()).diskCacheStrategy(DiskCacheStrategy.ALL))
-                .into(imgProfile);
+
     }
 
     @Override
