@@ -1,5 +1,6 @@
 package com.example.a17mri.login;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -36,6 +37,8 @@ public class LoginActivity extends AppCompatActivity {
     private EditText email,password;
     private static final int RC_SIGN_IN = 1996;
     private GoogleSignInClient googleSignInClient;
+    private ProgressDialog progressDialog=null;
+    private SignInButton googleSignInButton;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,7 +47,7 @@ public class LoginActivity extends AppCompatActivity {
         email=findViewById(R.id.userEmail);
         password=findViewById(R.id.userPassword);
 
-        SignInButton googleSignInButton=findViewById(R.id.googleSignIn);
+        googleSignInButton=findViewById(R.id.googleSignIn);
 
         googleSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,6 +94,7 @@ public class LoginActivity extends AppCompatActivity {
 
     //On sing in click method
     private  void signIn(String email, String password){
+        progressDialog=progressDialogShow(googleSignInButton.getRootView());
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -100,6 +104,7 @@ public class LoginActivity extends AppCompatActivity {
                 else {
                     Toast.makeText(getApplicationContext(),"SignIn error",Toast.LENGTH_LONG).show();
                     Log.v(TAG,"signInWithEmail:failure", task.getException());
+                    progressDialogDismiss(progressDialog);
                 }
             }
         });
@@ -144,6 +149,8 @@ public class LoginActivity extends AppCompatActivity {
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
 
+        progressDialog=progressDialogShow(googleSignInButton.getRootView());
+
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -157,6 +164,7 @@ public class LoginActivity extends AppCompatActivity {
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
+                            progressDialogDismiss(progressDialog);
                             Snackbar.make(findViewById(R.id.main), "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
                         }
 
@@ -167,8 +175,26 @@ public class LoginActivity extends AppCompatActivity {
 
     // on Successful sing in change activity
     public void onSuccess(){
+       progressDialogDismiss(progressDialog);
         Intent create_Account=new Intent(getApplicationContext(),HomeActivity.class);
         startActivity(create_Account);
         finish();
     }
+
+    private ProgressDialog progressDialogShow(View view){
+        ProgressDialog dialog=new ProgressDialog(view.getContext(),R.style.Theme_MyDialog);
+        dialog.setMessage("Sign in.......");
+        dialog.show();
+        return dialog;
+    }
+
+    private void progressDialogDismiss(ProgressDialog progressDialog){
+        try {
+            progressDialog.dismiss();
+        }
+        catch (NullPointerException e){
+
+        }
+    }
+
 }
